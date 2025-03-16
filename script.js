@@ -53,6 +53,12 @@ function startGame() {
     board = createEmptyBoard();
     currentPiece = generateNewPiece();
     currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
+
+    if (checkCollision(currentPiece, currentPiecePosition)) {
+        alert("Game Over al iniciar. No hay espacio.");
+        return;
+    }
+
     gameInterval = setInterval(updateGame, speed);
     document.getElementById('startButton').disabled = true;
     updateScore();
@@ -63,22 +69,24 @@ function updateGame() {
     currentPiecePosition.y++;
 
     if (checkCollision(currentPiece, currentPiecePosition)) {
+        currentPiecePosition.y--;
         placePieceOnBoard(currentPiece, currentPiecePosition);
         removeFullRows();
         currentPiece = generateNewPiece();
         currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
 
-        if (checkGameOver()) {
+        if (checkCollision(currentPiece, currentPiecePosition)) {
             clearInterval(gameInterval);
             alert('Game Over! Puntuación final: ' + score);
             document.getElementById('startButton').disabled = false;
+            return;
         }
     }
 
     drawBoard();
 }
 
-// Verificar colisión con las paredes o piezas en el tablero
+// Verificar colisión
 function checkCollision(piece, position) {
     for (let y = 0; y < piece.shape.length; y++) {
         for (let x = 0; x < piece.shape[y].length; x++) {
@@ -104,21 +112,19 @@ function placePieceOnBoard(piece, position) {
             }
         }
     }
-    score += 200; // Aumentar puntaje por fila eliminada
+    score += 100;
     updateScore();
 }
 
-// Eliminar las filas completas
+// Eliminar filas completas
 function removeFullRows() {
-    for (let y = rows - 1; y >= 0; y--) {
-        if (board[y].every(cell => cell !== 0)) {
-            board.splice(y, 1);
-            board.unshift(Array(columns).fill(0));
-        }
+    board = board.filter(row => row.some(cell => cell === 0));
+    while (board.length < rows) {
+        board.unshift(Array(columns).fill(0));
     }
 }
 
-// Dibujar el tablero y las piezas
+// Dibujar el tablero
 function drawBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let y = 0; y < rows; y++) {
@@ -133,64 +139,25 @@ function drawBoard() {
     drawPiece(currentPiece, currentPiecePosition);
 }
 
+// Dibujar la pieza actual
 function drawPiece(piece, position) {
-    for (let y = 0; y < piece.shape.length; y++) {
-        for (let x = 0; x < piece.shape[y].length; x++) {
-            if (piece.shape[y][x]) {
-                ctx.fillStyle = piece.color;
+    ctx.fillStyle = piece.color;
+    piece.shape.forEach((row, y) => {
+        row.forEach((cell, x) => {
+            if (cell) {
                 ctx.fillRect((position.x + x) * blockSize, (position.y + y) * blockSize, blockSize, blockSize);
             }
-        }
-    }
+        });
+    });
 }
 
-// Verificar si el juego está terminado
-function checkGameOver() {
-    return currentPiecePosition.y === 0 && checkCollision(currentPiece, currentPiecePosition);
-}
-
-// Mover la pieza a la izquierda
-function moveLeft() {
-    currentPiecePosition.x--;
-    if (checkCollision(currentPiece, currentPiecePosition)) {
-        currentPiecePosition.x++;
-    }
-}
-
-// Mover la pieza a la derecha
-function moveRight() {
-    currentPiecePosition.x++;
-    if (checkCollision(currentPiece, currentPiecePosition)) {
-        currentPiecePosition.x--;
-    }
-}
-
-// Rotar la pieza
-function rotatePiece() {
-    const rotatedShape = currentPiece.shape[0].map((_, index) =>
-        currentPiece.shape.map(row => row[index])
-    ).reverse();
-
-    const rotatedPiece = {
-        shape: rotatedShape,
-        color: currentPiece.color
-    };
-
-    const originalPiece = currentPiece;
-    currentPiece = rotatedPiece;
-
-    if (checkCollision(currentPiece, currentPiecePosition)) {
-        currentPiece = originalPiece;
-    }
-}
-
-// Actualizar el puntaje en la pantalla
+// Actualizar puntaje
 function updateScore() {
     scoreDisplay.textContent = score;
 }
 
-// Agregar eventos a los botones
+// Controles
 document.getElementById('startButton').addEventListener('click', startGame);
-document.getElementById('left').addEventListener('click', moveLeft);
-document.getElementById('right').addEventListener('click', moveRight);
+document.getElementById('left').addEventListener('click', () => currentPiecePosition.x--);
+document.getElementById('right').addEventListener('click', () => currentPiecePosition.x++);
 document.getElementById('rotate').addEventListener('click', rotatePiece);
