@@ -51,17 +51,22 @@ function startGame() {
     score = 0;
     speed = 500;
     board = createEmptyBoard();
+    spawnNewPiece();
+    gameInterval = setInterval(updateGame, speed);
+    document.getElementById('startButton').disabled = true;
+    updateScore();
+}
+
+// Generar nueva pieza en la parte superior
+function spawnNewPiece() {
     currentPiece = generateNewPiece();
     currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
 
     if (checkCollision(currentPiece, currentPiecePosition)) {
-        alert("Game Over al iniciar. No hay espacio.");
-        return;
+        clearInterval(gameInterval);
+        alert('Game Over! Puntuación final: ' + score);
+        document.getElementById('startButton').disabled = false;
     }
-
-    gameInterval = setInterval(updateGame, speed);
-    document.getElementById('startButton').disabled = true;
-    updateScore();
 }
 
 // Actualizar el estado del juego
@@ -72,15 +77,7 @@ function updateGame() {
         currentPiecePosition.y--;
         placePieceOnBoard(currentPiece, currentPiecePosition);
         removeFullRows();
-        currentPiece = generateNewPiece();
-        currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
-
-        if (checkCollision(currentPiece, currentPiecePosition)) {
-            clearInterval(gameInterval);
-            alert('Game Over! Puntuación final: ' + score);
-            document.getElementById('startButton').disabled = false;
-            return;
-        }
+        spawnNewPiece();
     }
 
     drawBoard();
@@ -107,57 +104,4 @@ function checkCollision(piece, position) {
 function placePieceOnBoard(piece, position) {
     for (let y = 0; y < piece.shape.length; y++) {
         for (let x = 0; x < piece.shape[y].length; x++) {
-            if (piece.shape[y][x]) {
-                board[position.y + y][position.x + x] = piece.color;
-            }
-        }
-    }
-    score += 100;
-    updateScore();
-}
-
-// Eliminar filas completas
-function removeFullRows() {
-    board = board.filter(row => row.some(cell => cell === 0));
-    while (board.length < rows) {
-        board.unshift(Array(columns).fill(0));
-    }
-}
-
-// Dibujar el tablero
-function drawBoard() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < columns; x++) {
-            if (board[y][x]) {
-                ctx.fillStyle = board[y][x];
-                ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-            }
-        }
-    }
-
-    drawPiece(currentPiece, currentPiecePosition);
-}
-
-// Dibujar la pieza actual
-function drawPiece(piece, position) {
-    ctx.fillStyle = piece.color;
-    piece.shape.forEach((row, y) => {
-        row.forEach((cell, x) => {
-            if (cell) {
-                ctx.fillRect((position.x + x) * blockSize, (position.y + y) * blockSize, blockSize, blockSize);
-            }
-        });
-    });
-}
-
-// Actualizar puntaje
-function updateScore() {
-    scoreDisplay.textContent = score;
-}
-
-// Controles
-document.getElementById('startButton').addEventListener('click', startGame);
-document.getElementById('left').addEventListener('click', () => currentPiecePosition.x--);
-document.getElementById('right').addEventListener('click', () => currentPiecePosition.x++);
-document.getElementById('rotate').addEventListener('click', rotatePiece);
+            if (piece.shape[y][x])
