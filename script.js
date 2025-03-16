@@ -4,7 +4,7 @@ const scoreElement = document.getElementById("score");
 
 const ROWS = 20;
 const COLUMNS = 10;
-const SCALE = Math.min(window.innerWidth * 0.09, 30); // Ajuste dinámico para móviles
+const SCALE = 30; // Ajuste del tamaño de los bloques
 
 canvas.width = COLUMNS * SCALE;
 canvas.height = ROWS * SCALE;
@@ -39,6 +39,8 @@ function newPiece() {
 }
 
 function drawBoard() {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     board.forEach((row, y) => {
         row.forEach((cell, x) => {
             if (cell) {
@@ -132,8 +134,6 @@ function update(time = 0) {
     lastTime = time;
     dropCounter += deltaTime;
     if (dropCounter > 1000) drop();
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawBoard();
     drawPiece();
     requestAnimationFrame(update);
@@ -146,7 +146,7 @@ document.addEventListener("keydown", (event) => {
     else if (event.key === "ArrowUp") rotate();
 });
 
-// 🚀 Eventos táctiles para móviles
+// 🚀 Botones táctiles
 document.getElementById("left").addEventListener("click", () => move(-1));
 document.getElementById("right").addEventListener("click", () => move(1));
 document.getElementById("down").addEventListener("click", drop);
