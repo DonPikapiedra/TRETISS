@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris</title>
+    <title>Tetris en JavaScript</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="tetrisCanvas" width="300" height="600"></canvas>
-        <div id="controls">
-            <button id="startButton">Iniciar Juego</button>
-            <div id="movement-buttons">
-                <button id="left">⬅️</button>
-                <button id="right">➡️</button>
-                <button id="rotate">🔄</button>
-            </div>
-        </div>
-        <div id="score-board">
-            <p>Puntaje: <span id="score">0</span></p>
-        </div>
+    <h1>Tetris en JavaScript</h1>
+    <h2>Puntuación: <span id="score">0</span></h2>
+    
+    <div class="game-container">
+        <canvas id="tetris"></canvas>
+    </div>
+
+    <div class="controls">
+        <button id="left">⬅️</button>
+        <button id="rotate">🔄</button>
+        <button id="right">➡️</button>
+        <button id="down">⬇️</button>
     </div>
 
     <script src="script.js"></script>
